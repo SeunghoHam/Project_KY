@@ -41,31 +41,25 @@ void APickupItem::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* Ot
 {
 	if (OtherActor && OtherActor->ActorHasTag("Tanjiro"))
 	{
-			//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::White,
-			//	FString::Printf(TEXT("HitActor  : %s"), * OtherActor->GetName()));
-		// Character -> InventoryCompoent 로 접근하기
 		ATanjiro* tanjiro = Cast<ATanjiro>(OtherActor);
-
-		const int32 Left = tanjiro->InventoryComponent->AddById(ItemId, Count); // 남은 수(못 넣은 수) 반환
-		//tanjiro->InventoryComponent->AddById(ItemId,Count);  // 남은 수 (못넣은 수)반환
+		const int32 Left = tanjiro->InventoryComponent->AddById(ItemId, Count); // 남은 수(Left) 반환
 		if (GEngine)
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::White,
 				FString::Printf(TEXT("Picked %s x%d (Left:%d) by %s"),
 					*ItemId.ToString(), Count, Left, *OtherActor->GetName()));
 		}
-		// 모두 담았으면 픽업 제거, 남으면 수량만 갱신(메시 텍스트 갱신 등)
+		// UI 갱신은 Inv 안에서 BroadcastChanged()가 호출되어 위젯이 자동 Refresh됨
+		// 남은 아이템이 없다면 제거
 		if (Left <= 0)
 		{
-			Destroy(); // 서버에서 Destroy → 클라에 복제되어 사라짐
+			Destroy();
 		}
 		else
 		{
 			Count = Left;
 			// TODO: 남은 수량을 월드 메시/위젯으로 갱신해주고 싶다면 여기서 처리
 		}
-		// UI 갱신은 Inv 안에서 BroadcastChanged()가 호출되어 위젯이 자동 Refresh됨
-		//Destroy();
 	}
 }
 

@@ -18,6 +18,8 @@ enum class EAnimType : uint8
 	Punch1,
 	Punch2,
 	Kick,
+	BigPunch1,
+	BigPunch2,
 };
 UCLASS()
 class KY_API UOniAnimInstance : public UAnimInstance

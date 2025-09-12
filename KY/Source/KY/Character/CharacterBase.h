@@ -57,7 +57,7 @@ public:
 	UAnimMontage* GetCurrentMontage() const { return CurrentPlayMontage; }
 	//virtual void TryCounter();
 	virtual void SuccessCounter(); // 내가 시도한 공격이 먹힘 -> 몽타주 멈추고  Idle or 자동공격
-	virtual void GetCounter(EAttackType _type, const FTransform& _socketPoint); // 카운터 공격을 받음 -> 몽타주 멈추고, 그로기 올림
+	virtual void GetCounter(const FTransform& _socketPoint){}; // 카운터 공격을 받음 -> 몽타주 멈추고, 그로기 올림
 	FVector Hand_L_Point;
 	FVector Hand_R_Point;
 	

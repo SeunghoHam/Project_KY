@@ -37,12 +37,14 @@ public:
 	UPROPERTY(EditAnywhere, Category=Setting)
 	TSubclassOf<AActor> FX_SurpriseAttackActor;
 	
-	virtual void GetCounter(EAttackType _type, const FTransform& _socketPoint) override;
+	//virtual void GetCounter(EAttackType _type, const FTransform& _socketPoint) override;
+	virtual void GetCounter(const FTransform& _socketPoint) override;
 	
 	void AttackMontage();
 	virtual void CheckCurrentHP() override;
 	virtual void Death() override;
-
+	
+	
 	// BlueprintTask
 	UFUNCTION(BlueprintCallable,BlueprintPure)
 	FVector GetTanjiroLastLocation();
@@ -50,8 +52,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void OniSurpriseAttack();
 	FVector SurpriseHide();
+	
 	UFUNCTION(BlueprintCallable)
 	void TaskComboAttack();
+	
 	UFUNCTION(BlueprintCallable,BlueprintPure)
 	bool GetOniCanAttack(){ return bCanAttack; }
 	UFUNCTION(BlueprintCallable, BlueprintPure)

@@ -33,7 +33,7 @@ void AOni::BeginPlay()
 	
 	RS = GetGameInstance()->GetSubsystem<UEnemyRegistrySubsystem>();
 	RegisterEnemy();
-	StatusInitialize(20.f, 10.f);
+	StatusInitialize(40.f, 10.f);
 	TargetTag = "Tanjiro";
 	//GetWorld()->GetTimerManager().SetTimer(AttackTimerHandle,this,
 	//&AOni::AttackMontage, 2.0f, true);
@@ -51,13 +51,14 @@ void AOni::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 }
 
-void AOni::GetCounter(EAttackType _type, const FTransform& _socketPoint)
+//void AOni::GetCounter(EAttackType _type, const FTransform& _socketPoint)
+void AOni::GetCounter(const FTransform& _socketPoint)
 {
 	//Super::GetCounter(_type, _socketPoint);
 	AnimInstance->EffectorLocation= _socketPoint.GetLocation();
 	AnimInstance->EffectorTransform  = _socketPoint;
 	SetGameSpeed(0.3f);
-	switch (_type)
+	switch (AttackType)
 	{
 	case EAttackType::Left:
 		AnimInstance->IK_L_Alpha = 1.0f;
@@ -132,8 +133,8 @@ void AOni::CheckCurrentHP()
 {
 	Super::CheckCurrentHP();
 
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f,FColor::Magenta,
-	FString::Printf( TEXT("CheckCurrentHP : %f"), CurrentHP));
+	//GEngine->AddOnScreenDebugMessage(-1, 1.0f,FColor::Magenta,
+	//FString::Printf( TEXT("CheckCurrentHP : %f"), CurrentHP));
 
 
 	if (CurrentHP <= 0)
@@ -175,7 +176,7 @@ FVector AOni::GetTanjiroLastLocation()
 		
 		GEngine->AddOnScreenDebugMessage(-1, 1.0f,FColor::Magenta,
 FString::Printf( TEXT("Tanjiro = null :")));
-		return GetActorLocation();
+		//return GetActorLocation();
 	}
 
 	FActorSpawnParameters param;
@@ -184,7 +185,7 @@ FString::Printf( TEXT("Tanjiro = null :")));
 	{
 		GetWorld()->SpawnActor<AActor>(FX_SurpriseAttackActor, GetActorLocation(),GetActorRotation(), param);
 	}
-	SurpriseAttackLoc = SurpriseHide();
+	SurpriseAttackLoc = Target->GetActorLocation() + (Target->GetActorForwardVector()* 150) + FVector(0.f, 0.f, 200.0f); //SurpriseHide();
 	GetMesh()->SetVisibility(false);
 	
 	//const FRotator rot = ((Target->GetActorLocation() - NormalLoc).GetSafeNormal()).Rotation();
@@ -192,33 +193,35 @@ FString::Printf( TEXT("Tanjiro = null :")));
 	//FQuat newQ = FRotator(0.f,yawOnly,0.f).Quaternion();
 	//SetActorRotation(newQ);
 	
-
 	//FVector NormalLoc = FVector(GetActorLocation().X, GetActorLocation().Y, Target->GetActorLocation().Z);
-	FVector Dir = Target->GetActorLocation() - GetActorLocation();
-	FRotator YawOnly = Dir.Rotation();
-	YawOnly.Pitch = 0.f;
-	YawOnly.Roll  = 0.f;
-	
-	if (AController* C = GetController())
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 1.0f,FColor::White,TEXT("Controller Rotaoitn"));
-		C->SetControlRotation(YawOnly);
-		SetActorRotation(YawOnly);
-	}
+
 	
 	return SurpriseAttackLoc;
 }
 
 void AOni::OniSurpriseAttack()
 {
+	FVector Dir = Target->GetActorLocation() - GetActorLocation();
+	FRotator YawOnly = Dir.Rotation();
+	YawOnly.Pitch = 0.f;
+	YawOnly.Roll  = 0.f;
+	FQuat Rot = YawOnly.Quaternion();
+	if (AController* C = GetController())
+	{
+		//GEngine->AddOnScreenDebugMessage(-1, 1.0f,FColor::White,TEXT("Controller Rotaoitn"));
+		//C->SetControlRotation(YawOnly);
+	}
+	else
+	{
+		SetActorRotation(Rot);
+		
+	}
+	
 	// 이펙트랑 같이 나오기
 	GetMesh()->SetVisibility(true);
-	
-	//GEngine->AddOnScreenDebugMessage(-1,5.0f, FColor::Magenta, TEXT("[Oni] SurpriseAttack"));
-
 	if (!Target) return;
-	DrawDebugSphere(GetWorld(), SurpriseAttackLoc, 32.f, 16,FColor::Red,false,2.0f);
-	DrawDebugLine(GetWorld(),GetActorLocation(), SurpriseAttackLoc,FColor::Red,false, 2.0f, 0 ,2.0f);
+	//DrawDebugSphere(GetWorld(), SurpriseAttackLoc, 32.f, 16,FColor::Red,false,2.0f);
+	//DrawDebugLine(GetWorld(),GetActorLocation(), SurpriseAttackLoc,FColor::Red,false, 2.0f, 0 ,2.0f);
 	SetActorLocation(SurpriseAttackLoc, false);
 	//SetActorRotation(SurpriseAttackRot);
 	
@@ -226,7 +229,7 @@ void AOni::OniSurpriseAttack()
 	param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	if (FX_SurpriseAttackActor)
 	{
-		GetWorld()->SpawnActor<AActor>(FX_SurpriseAttackActor, SurpriseAttackLoc, SurpriseAttackRot, param);
+		GetWorld()->SpawnActor<AActor>(FX_SurpriseAttackActor, SurpriseAttackLoc, SurpriseAttackRot,param);
 	}
 	if (SurpriseAttack)
 	{
@@ -263,16 +266,33 @@ void AOni::TaskComboAttack()
 	// z 위치 통일화
 	if (Target == nullptr) return;
 	// 1) 나 → 타겟 방향(수평면만)
-	SetAttackDir(); 
-	
-	AnimInstance->AnimType = EAnimType::Punch1;
+	SetAttackDir();
+	// 랜덤 적용하기?
+	PlayAnimationMontage(RightAttack);
 	AttackType = EAttackType::Right;
-	ComboAttackCount =0;
+	TWeakObjectPtr<AOni> WeakThis(this);
+	FTimerHandle timeHandle;
+	GetWorld()->GetTimerManager().SetTimer(timeHandle, [WeakThis, this]()
+	{
+		if (!WeakThis.IsValid()) return;
+		if (CurrentHP <= 0) return;
+		PlayAnimationMontage(LeftAttack);
+		AttackType = EAttackType::Left;
+
+	},  1.2f, false);
+	
+	//AnimInstance->AnimType = EAnimType::Punch1;
+	//AttackType = EAttackType::Right;
+	//ComboAttackCount =0;
 }
 
 AActor* AOni::GetTanjiroActor()
 {
-	if (Target == nullptr) return nullptr;
+	if (Target == nullptr)
+	{
+		Target =  UGameplayStatics::GetPlayerCharacter(GetWorld(),0);
+	}
+	//	return nullptr;
 	
 	ATanjiro* tan = Cast<ATanjiro>(Target);
 	FText targetN = FText::FromString(Target->GetName());
@@ -343,7 +363,7 @@ void AOni::AN_ComboAttackPoint()
 
 void AOni::AN_CounterEnd()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f,FColor::White,TEXT("AN_CounterENd"));
+	//GEngine->AddOnScreenDebugMessage(-1, 2.0f,FColor::White,TEXT("AN_CounterENd"));
 	AnimInstance->IK_L_Alpha = 0.f;
 	AnimInstance->IK_R_Alpha = 0.f;
 	SetGameSpeed(1.f);
@@ -436,7 +456,7 @@ void AOni::SetAttackDir()
 	
 	if (AController* C = GetController())
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 1.0f,FColor::White,TEXT("Controller Rotaoitn"));
+		//GEngine->AddOnScreenDebugMessage(-1, 1.0f,FColor::White,TEXT("Controller Rotaoitn"));
 		C->SetControlRotation(YawOnly);
 	}
 	// 2) 회전 적용

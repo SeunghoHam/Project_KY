@@ -343,12 +343,12 @@ void ATanjiro::InputJumpPressed()
 	
 	if (bIsQPressed)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::White, TEXT("Big Jump"));
+		//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::White, TEXT("Big Jump"));
 		GetCharacterMovement()->JumpZVelocity = MinJumpVelocity + 1000.f;
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::White, TEXT("Normal Jump"));
+		//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::White, TEXT("Normal Jump"));
 		GetCharacterMovement()->JumpZVelocity = MinJumpVelocity;
 		
 	}
@@ -372,7 +372,7 @@ void ATanjiro::InputJumpReleased()
 void ATanjiro::Input_LMB_Pressed()
 {
 	if (WidgetActiveNumber != 0) return;
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue,TEXT("LMBPress"));
+	//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue,TEXT("LMBPress"));
 	
 	if (bIsQPressed)
 	{
@@ -519,13 +519,13 @@ void ATanjiro::Input_Tab_Pressed()
 		TanjiroController->SetInputMode(Mode);
 		TanjiroController->bShowMouseCursor =false;
 	}
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, TEXT("Tab Pressed"));
+	//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, TEXT("Tab Pressed"));
 }
 
 void ATanjiro::CheckCurrentHP()
 {
 	Super::CheckCurrentHP();
-	GEngine->AddOnScreenDebugMessage(1, 1.0f, FColor::White, FString::Printf(TEXT(" currentHP : %f"), CurrentHP));
+	//GEngine->AddOnScreenDebugMessage(1, 1.0f, FColor::White, FString::Printf(TEXT(" currentHP : %f"), CurrentHP));
 	PlayAnimationMontage(HitMontage);
 }
 
@@ -561,7 +561,7 @@ void ATanjiro::AN_FreezeAtEnd()
 
 void ATanjiro::UnFreeze()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Green,TEXT("UnFreeze"));
+	//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Green,TEXT("UnFreeze"));
 	// 입력 가능상태도 여기서 변경
 	//UAnimInstance* Anim = GetMesh()->GetAnimInstance();
 	//Anim->Montage_Resume(currentplya)
@@ -754,7 +754,7 @@ AActor* ATanjiro::FindNearestEnemy(float _dist)
 		if (It->ActorHasTag(TargetTag))
 		{
 			float Dist = FVector::Dist(GetActorLocation(), It->GetActorLocation());
-			DrawDebugLine(GetWorld(), GetActorLocation(), It->GetActorLocation(), FColor::Green, false, 1.0f);
+			//DrawDebugLine(GetWorld(), GetActorLocation(), It->GetActorLocation(), FColor::Green, false, 1.0f);
 			if (Dist < _dist)
 			{
 				Closest = *It;
@@ -799,7 +799,7 @@ AOni* ATanjiro::LineTraceFront() const
 	// 필요하면 더 무시할 액터/컴포넌트를 추가
 	// Params.AddIgnoredActor(WeaponActor);
 
-	DrawDebugLine(GetWorld(),Start,End,FColor::Green, false, 1.0f);
+	//DrawDebugLine(GetWorld(),Start,End,FColor::Green, false, 1.0f);
 	FHitResult OutHit;
 	TEnumAsByte<ECollisionChannel> Channel;
 	// 3) 단일 라인트레이스
@@ -855,11 +855,12 @@ AOni* ATanjiro::TraceSphere(FVector _point) const
 void ATanjiro::SuccessCounter()
 {
 	//Super::SuccessCounter();
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue,TEXT("Success Counter"));
+	//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue,TEXT("Success Counter"));
 	if (ParringCameraShake) TanjiroController->ClientStartCameraShake(ParringCameraShake.Get());
 	BP_ParringBackMove();
 	FTransform SocketTF = GetKatanaSocket();
-	CurrentTargetOni->GetCounter(CurrentTargetOni->GetAttackType(), SocketTF); //적이 가지고있는 Type을 넘겨서 보기 편하게
+	//CurrentTargetOni->GetCounter(CurrentTargetOni->GetAttackType(), SocketTF);
+	CurrentTargetOni->GetCounter(SocketTF);
 	SoundComponent->Play2DHandle(ESoundName::effect_Parring);
 
 	if (FX_Parring)
@@ -933,8 +934,8 @@ void ATanjiro::SpawnBoodActor()
 	FActorSpawnParameters param;
 	param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	AActor* blood = GetWorld()->SpawnActor<AActor>(BloodEffectActor, loc,FRotator::ZeroRotator,param);
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue,
-		FString::Printf( TEXT("BloodActor : %s"), *blood->GetName()));
+	//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue,
+	//	FString::Printf( TEXT("BloodActor : %s"), *blood->GetName()));
 	//blood->lifetime(1.0f);
 }
 

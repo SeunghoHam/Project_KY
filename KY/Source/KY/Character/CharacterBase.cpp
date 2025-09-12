@@ -96,7 +96,7 @@ AActor* ACharacterBase::CreateCheckCollision(FVector _dir, FVector _halfSize, fl
 	
 	//DrawDebugSphere(GetWorld(), CollisionStart, 50.0f, 16, FColor::Blue, false, 5.0f);
 	//DrawDebugSphere(GetWorld(), CollisionEnd, 50.0f, 16, FColor::Green, false, 5.0f);
-	DrawDebugBox(GetWorld(), CoverCenter, CoverExtent, Rot, FColor::Blue, false, 5.0f);
+	//DrawDebugBox(GetWorld(), CoverCenter, CoverExtent, Rot, FColor::Blue, false, 5.0f);
 	if (bHit)
 	{
 		for (const FHitResult& HitActor : OutHits)
@@ -119,12 +119,13 @@ void ACharacterBase::SuccessCounter()
 }
 
 // _type은 공격쪽. Right라면 Left가 실행되도록
+/*
 void ACharacterBase::GetCounter(EAttackType _type,const FTransform& _socketPoint)
 {
 
 	//AnimationComponent->StopMontage(CurrentPlayMontage);
 }
-
+*/
 void ACharacterBase::CheckCurrentHP()
 {
 	CurrentHP = FMath::Clamp(CurrentHP - GetDamage, 0.f, MaxHP);
